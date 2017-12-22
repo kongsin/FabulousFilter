@@ -11,6 +11,7 @@ import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.annotation.Nullable;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.view.ViewPager;
@@ -31,7 +32,7 @@ import com.allattentionhere.fabulousfilter.viewpagerbottomsheet.ViewPagerBottomS
  * Created by krupenghetiya on 05/10/16.
  */
 
-public class AAH_FabulousFragment extends ViewPagerBottomSheetDialogFragment {
+public class AAH_FabulousFragment extends ViewPagerBottomSheetDialogFragment implements KeyboardUtils.SoftKeyboardToggleListener{
 
     private FloatingActionButton parent_fab;
     private DisplayMetrics metrics;
@@ -96,9 +97,8 @@ public class AAH_FabulousFragment extends ViewPagerBottomSheetDialogFragment {
     public void onStart() {
         super.onStart();
         getDialog().getWindow().setWindowAnimations(R.style.dialog_animation_fade);
-
+        KeyboardUtils.addKeyboardToggleListener(getActivity(), this);
     }
-
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -140,7 +140,9 @@ public class AAH_FabulousFragment extends ViewPagerBottomSheetDialogFragment {
         ((View) contentView.getParent()).setBackgroundColor(getResources().getColor(android.R.color.transparent));
 
         mBottomSheetBehavior = ViewPagerBottomSheetBehavior.from(((View) contentView.getParent()));
+
         if (mBottomSheetBehavior != null) {
+
             mBottomSheetBehavior.setBottomSheetCallback(mBottomSheetBehaviorCallback);
             if ((fab_pos_y - (metrics.heightPixels - (metrics.density * peek_height)) + (fab_size * metrics.density) - (fab_size * metrics.density)) <= 0) {
                 is_fab_outside_peekheight = true;
@@ -339,10 +341,26 @@ public class AAH_FabulousFragment extends ViewPagerBottomSheetDialogFragment {
                 });
     }
 
+    public void skipColapse(){
+        if (mBottomSheetBehavior != null) {
+            mBottomSheetBehavior.setState(ViewPagerBottomSheetBehavior.STATE_EXPANDED);
+        }
+    }
+
     @Override
     public void onStop() {
         parent_fab.setVisibility(View.VISIBLE);
+        KeyboardUtils.removeKeyboardToggleListener(this);
         super.onStop();
+    }
+
+    @Override
+    public void onToggleSoftKeyboard(boolean isVisible) {
+        if (isVisible){
+            if (viewgroup_static != null && mBottomSheetBehavior != null) {
+                mBottomSheetBehavior.setState(ViewPagerBottomSheetBehavior.STATE_EXPANDED);
+            }
+        }
     }
 
 
